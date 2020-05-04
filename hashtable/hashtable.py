@@ -163,7 +163,7 @@ class HashTable:
         self.population = 0
         for item in self.storage:
 
-            # put only operates on the old table
+            # self.put only operates on the old table so this way isn't ideal
             if item:
                 location = self.hash_index(item.key)
                 if new_table[location] is None:

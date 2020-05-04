@@ -78,6 +78,7 @@ class TestHashTable(unittest.TestCase):
 
         ht.resize()
 
+        # print(len(ht.storage), 0x20000)
         self.assertTrue(len(ht.storage) == 0x20000)
         # ht.Print()
 
