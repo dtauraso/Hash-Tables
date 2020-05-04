@@ -8,6 +8,12 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
+    
+    def append(self, current, key, value):
+
+        new_node = HashTableEntry(key, value)
+        if current.next is None:
+            current.next = new_node
 
 class HashTable:
     """
@@ -16,13 +22,30 @@ class HashTable:
 
     Implement this.
     """
+    def __init__(self, capacity):
 
+        self.storage = [None] * capacity
+        self.population = 0
+        self.capacity = capacity
     def fnv1(self, key):
         """
         FNV-1 64-bit hash function
 
         Implement this, and/or DJB2.
         """
+        str_bytes = str(key).encode()
+        total = 0
+        
+        # Loop through all the bytes
+        for b in str_bytes:
+            total += b
+            total &= 0xffffffff  # clamp to 32 bits
+            
+            # To make your FNV-1 hash correct, add this as the last line of the loop:
+            total &= 0xffffffffffffffff  # 64-bit (16 f's)
+
+        return total
+
 
     def djb2(self, key):
         """
@@ -30,6 +53,17 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
+        str_bytes = str(key).encode()
+
+        total = 0
+        # Loop through all the bytes
+        for b in str_bytes:
+            total += b
+
+             # To make your DJB2 hash correct, add this as the last line of the loop:
+            total &= 0xffffffff  # 32-bit (8 f's)
+
+        return total
 
     def hash_index(self, key):
         """
@@ -48,6 +82,22 @@ class HashTable:
         Implement this.
         """
 
+        '''
+        get the expected index
+        if no collision
+            store (key, value)
+        else
+            go to end of linked list and append it
+        '''
+        location = self.hash_index(key)
+        if self.storage[location] is None:
+            self.storage[location] = HashTableEntry(key, value)
+            self.population += 1
+        # for now just overwrite
+        else:
+            self.storage[location] = HashTableEntry(key, value)
+
+
     def delete(self, key):
         """
         Remove the value stored with the given key.
@@ -56,6 +106,20 @@ class HashTable:
 
         Implement this.
         """
+        '''
+        get the expected index
+        if no collision
+            erase (key, value)
+        else
+            head = array slot
+            next = first item in linked list
+            delete the node
+        '''
+        location = self.hash_index(key)
+        if self.storage[location] is not None:
+            del self.storage[location]
+            self.population -= 1
+
 
     def get(self, key):
         """
@@ -65,6 +129,24 @@ class HashTable:
 
         Implement this.
         """
+        '''
+        get the expected index
+        if no collision
+            return (key, value)
+        else
+            
+            find in linked list and return it
+        '''
+        location = self.hash_index(key)
+        if self.storage[location] is not None:
+            if self.storage[location].next is None:
+                return self.storage[location].value
+            else:
+                print('colision')
+                return None
+        elif self.storage[location] is None:
+            return None
+
 
     def resize(self):
         """
@@ -73,6 +155,34 @@ class HashTable:
 
         Implement this.
         """
+
+        # print(len(self.storage), self.capacity)
+
+        self.capacity *= 2
+        new_table = [None] * self.capacity
+        self.population = 0
+        for item in self.storage:
+
+            # put only operates on the old table
+            if item:
+                location = self.hash_index(item.key)
+                if new_table[location] is None:
+                    new_table[location] = HashTableEntry(item.key, item.value)
+                    self.population += 1
+                # for now just overwrite
+                else:
+                    new_table[location] = HashTableEntry(item.key, item.value)
+                
+        self.storage = new_table
+        # print(len(self.storage), self.capacity, 0x20000)
+
+    def __len__(self):
+        # print('special function')
+        return self.capacity
+    def Print(self):
+        print("here")
+        [print(item.key, item.value) for item in self.storage if item is not None]
+
 
 if __name__ == "__main__":
     ht = HashTable(2)
