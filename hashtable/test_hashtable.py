@@ -121,7 +121,14 @@ class TestHashTable(unittest.TestCase):
         return_value = ht.get("key-9")
         self.assertTrue(return_value == "val-9")
 
+        # print('before delete')
+        # ht.Print()
+
         ht.delete("key-9")
+
+        # print('after delete')
+        # ht.Print()
+
         ht.delete("key-8")
         ht.delete("key-7")
         ht.delete("key-6")
@@ -131,7 +138,6 @@ class TestHashTable(unittest.TestCase):
         ht.delete("key-2")
         ht.delete("key-1")
         ht.delete("key-0")
-
         return_value = ht.get("key-0")
         self.assertTrue(return_value is None)
         return_value = ht.get("key-1")
@@ -167,6 +173,7 @@ class TestHashTable(unittest.TestCase):
         ht.put("key-8", "val-8")
         ht.put("key-9", "val-9")
 
+        
         ht.resize()
 
         self.assertTrue(len(ht.storage) == 16)

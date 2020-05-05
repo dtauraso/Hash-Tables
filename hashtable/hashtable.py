@@ -9,11 +9,11 @@ class HashTableEntry:
         self.next = None
 
     
-    def append(self, current, key, value):
+    # def beforeHead(self, current, key, value):
 
-        new_node = HashTableEntry(key, value)
-        if current.next is None:
-            current.next = new_node
+    #     new_node = HashTableEntry(key, value)
+    #     if current.next is None:
+    #         current.next = new_node
 
 class HashTable:
     """
@@ -93,9 +93,14 @@ class HashTable:
         if self.storage[location] is None:
             self.storage[location] = HashTableEntry(key, value)
             self.population += 1
-        # for now just overwrite
+
         else:
-            self.storage[location] = HashTableEntry(key, value)
+            # put in a new head
+            new_node = HashTableEntry(key, value)
+            new_node.next = self.storage[location]
+            self.storage[location] = new_node
+            self.population += 1
+
 
 
     def delete(self, key):
@@ -116,9 +121,51 @@ class HashTable:
             delete the node
         '''
         location = self.hash_index(key)
-        if self.storage[location] is not None:
-            del self.storage[location]
-            self.population -= 1
+
+        # at least 1 node
+        # if self.storage[location] is not None:
+            
+        #     self.storage[location] = None
+        #     self.population -= 1
+        
+        # Find the node to delete
+        cur = self.storage[location]
+        head = self.storage[location]
+        # there is no key to delete
+        if cur is None:
+            return None
+
+        # the head key is being deleted
+        # Delete the head special case
+        if cur.key == key:
+            # print('this case', cur.key)
+            head = head.next
+            # print('head', head.key)
+            # print('cur', cur.key)
+
+            cur.next = None
+            # head is not the same so must set the base location back to head
+            self.storage[location] = head
+            # self.printList(head)
+            # print()
+            return cur
+
+        # if the head is not the right key
+        # maintain a prev and cur where cur is the first node
+        prev = None
+        # look ahead
+        while cur is not None:
+            if cur.key == key:
+                # Found it, delete it
+                prev.next = cur.next
+                cur.next = None
+                return cur
+
+            prev = cur
+            cur = cur.next
+
+        return None
+        
 
 
     def get(self, key):
@@ -142,7 +189,15 @@ class HashTable:
             if self.storage[location].next is None:
                 return self.storage[location].value
             else:
-                print('colision')
+                # print('colision')
+
+                tracker = self.storage[location]
+                while tracker:
+                    if(tracker.key != key):
+                        tracker = tracker.next
+                    else:
+                        return tracker.value
+                # if we can't find it return None
                 return None
         elif self.storage[location] is None:
             return None
@@ -163,15 +218,27 @@ class HashTable:
         self.population = 0
         for item in self.storage:
 
-            # self.put only operates on the old table so this way isn't ideal
             if item:
-                location = self.hash_index(item.key)
-                if new_table[location] is None:
-                    new_table[location] = HashTableEntry(item.key, item.value)
-                    self.population += 1
-                # for now just overwrite
-                else:
-                    new_table[location] = HashTableEntry(item.key, item.value)
+
+                # need to visit all nodes in linked list
+                tracker = item
+                while tracker:
+
+                    # self.put only operates on the old table so this way isn't ideal
+                    location = self.hash_index(tracker.key)
+                    if new_table[location] is None:
+                        new_table[location] = HashTableEntry(tracker.key, tracker.value)
+                        self.population += 1
+
+                    else:
+                        # put in a new head
+                        new_node = HashTableEntry(tracker.key, tracker.value)
+                        new_node.next = new_table[location]
+                        new_table[location] = new_node
+                        self.population += 1
+                    tracker = tracker.next
+
+                    # new_table[location] = HashTableEntry(item.key, item.value)
                 
         self.storage = new_table
         # print(len(self.storage), self.capacity, 0x20000)
@@ -180,8 +247,23 @@ class HashTable:
         # print('special function')
         return self.capacity
     def Print(self):
-        print("here")
-        [print(item.key, item.value) for item in self.storage if item is not None]
+        # print("here")
+        for item in self.storage:
+            items = []
+            if item:
+                tracker = item
+                while tracker:
+                    items.append((tracker.key, tracker.value))
+                    tracker = tracker.next
+            print(items)
+    def printList(self, item):
+        items = []
+        tracker = item
+        while tracker:
+            items.append((tracker.key, tracker.value))
+            tracker = tracker.next
+        print(items)
+        # [print(item.key, item.value) for item in self.storage if item is not None]
 
 
 if __name__ == "__main__":
