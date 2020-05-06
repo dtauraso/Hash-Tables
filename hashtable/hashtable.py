@@ -93,6 +93,8 @@ class HashTable:
         if self.storage[location] is None:
             self.storage[location] = HashTableEntry(key, value)
             self.population += 1
+            if self.find_load_factor() < 0.7:
+                self.down_size()
 
         else:
             # put in a new head
@@ -100,9 +102,17 @@ class HashTable:
             new_node.next = self.storage[location]
             self.storage[location] = new_node
             self.population += 1
+            if self.find_load_factor() < 0.7:
+                self.down_size()
 
 
-
+    def find_load_factor(self):
+        return self.population / self.capacity
+    def down_size(self):
+        if self.capacity // 2 >= 128:
+            self.resize(self.capacity // 2)
+    def up_size(self):
+        self.resize(self.capacity * 2)
     def delete(self, key):
         """
         Remove the value stored with the given key.
@@ -146,6 +156,9 @@ class HashTable:
             cur.next = None
             # head is not the same so must set the base location back to head
             self.storage[location] = head
+            self.population -= 1
+            if self.find_load_factor() < 0.2:
+                self.up_size()
             # self.printList(head)
             # print()
             return cur
@@ -159,6 +172,10 @@ class HashTable:
                 # Found it, delete it
                 prev.next = cur.next
                 cur.next = None
+                self.population -= 1
+                if self.find_load_factor() < 0.2:
+                    self.up_size()
+
                 return cur
 
             prev = cur
@@ -203,7 +220,7 @@ class HashTable:
             return None
 
 
-    def resize(self):
+    def resize(self, new_size):
         """
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
@@ -213,7 +230,7 @@ class HashTable:
 
         # print(len(self.storage), self.capacity)
 
-        self.capacity *= 2
+        self.capacity = new_size
         new_table = [None] * self.capacity
         self.population = 0
         for item in self.storage:
