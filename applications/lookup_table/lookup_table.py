@@ -1,10 +1,38 @@
 import math
 import random
 
+caches = {  'power': {},
+            'factorial': {}}
+
+def power_has_input(x, y):
+    global caches
+    if x in caches['power']:
+        if y in caches['power'][x]:
+            return True
+    return False
+
+def factorial_has_input(x):
+    global caches
+    if x in caches['factorial']:
+        return True
+    return False
+
 def slowfun(x, y):
     # TODO: Modify to produce the same results, but much faster
-    v = math.pow(x, y)
-    v = math.factorial(v)
+    global caches
+    v = 0
+    if power_has_input(x, y):
+        v = caches['power'][x][y]
+    else:
+
+        caches['power'][x] = {y: math.pow(x, y)}
+        v = caches['power'][x][y]
+    if factorial_has_input(v):
+        v = caches['factorial'][v]
+    else:
+        # caches['factorial'][v]
+        caches['factorial'][v] = math.factorial(v)
+        v = caches['factorial'][v]
     v //= (x + y)
     v %= 982451653
 
